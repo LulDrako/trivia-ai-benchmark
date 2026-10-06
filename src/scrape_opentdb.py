@@ -10,6 +10,7 @@ Contraintes de l'API :
 - 1 appel toutes les 5 secondes
 - code 5 : trop d'appels, on attend et on réessaie
 - code 1 : pas assez de questions pour la quantité demandée, on réduit
+- le token est réinitialisé une seule fois, quand toutes les questions sont récupérées
 """
 
 from __future__ import annotations
@@ -30,6 +31,7 @@ COUNT_URL = "https://opentdb.com/api_count_global.php"
 MAX_AMOUNT = 50
 PAUSE_SECONDS = 5.0
 TIMEOUT_SECONDS = 30
+MAX_NETWORK_RETRIES = 5
 
 COLUMNS = [
     "category",
@@ -64,7 +66,8 @@ class RateLimiter:
 
 
 def get_json(session: requests.Session, limiter: RateLimiter, url: str, params: dict | None = None) -> dict:
-    """Appelle OpenTDB en respectant le rate limit. Réessaie sur le code 5."""
+    """Appelle OpenTDB en respectant le rate limit. Réessaie sur le code 5 et sur une coupure."""
+    network_errors = 0
     while True:
         limiter.wait()
         try:
@@ -74,7 +77,18 @@ def get_json(session: requests.Session, limiter: RateLimiter, url: str, params: 
                 "Le certificat HTTPS est intercepté par un proxy. "
                 "Coupe le VPN ou le proxy de l'école, puis relance le script."
             )
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as exc:
+            limiter.mark()
+            network_errors += 1
+            if network_errors >= MAX_NETWORK_RETRIES:
+                raise
+            print(
+                f"Connexion coupée ({exc}). Nouvel essai {network_errors}/{MAX_NETWORK_RETRIES} après la pause.",
+                flush=True,
+            )
+            continue
         limiter.mark()
+        network_errors = 0
 
         if response.status_code == 403:
             raise SystemExit(
@@ -96,6 +110,15 @@ def request_token(http: requests.Session, limiter: RateLimiter) -> str:
     if payload.get("response_code") != 0 or "token" not in payload:
         raise SystemExit(f"Impossible d'obtenir un token de session : {payload}")
     return payload["token"]
+
+
+def reset_token(http: requests.Session, limiter: RateLimiter, token: str) -> None:
+    """Remet les questions dans le pool. Une seule fois, quand la collecte est finie."""
+    payload = get_json(http, limiter, TOKEN_URL, {"command": "reset", "token": token})
+    if payload.get("response_code") != 0:
+        print(f"Reset du token non confirmé : {payload}")
+        return
+    print("Token réinitialisé.")
 
 
 def verified_question_count(http: requests.Session, limiter: RateLimiter) -> int | None:
@@ -212,12 +235,14 @@ def scrape(output: Path, session_path: Path, reset: bool) -> None:
                     f"Attention : OpenTDB annonçait {expected} questions vérifiées, "
                     f"le token en a renvoyé {written}."
                 )
+            reset_token(http, limiter, token)
             return
 
         if code == 1:
             if amount == 1:
                 save_session(session_path, token, written, done=True)
                 print(f"Plus de question disponible. {written} questions dans {output}")
+                reset_token(http, limiter, token)
                 return
             amount = max(1, amount // 2)
             print(f"Pas assez de questions pour ce tirage (code 1). Nouvel essai avec {amount}.", flush=True)
