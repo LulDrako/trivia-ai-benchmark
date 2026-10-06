@@ -40,3 +40,15 @@ Le sujet fixe trois formats. On ne choisit pas le Parquet à la place du CSV pou
 - Le gold sera une base DuckDB, pas un Parquet. Ce ne sont plus les questions, ce sont les chiffres du rapport. dbt les construit.
 
 `profiles.yml`, `dbt_project.yml` et les modèles SQL viennent après l'enrichissement, quand le silver contient aussi `ai_answer`, `ai_correct` et `response_time`. Les écrire maintenant obligerait à les refaire.
+
+## Modèle
+
+On a regardé les modèles gratuits d'OpenRouter (`:free`). Ils ne coûtent rien à l'appel, mais un compte sans crédit acheté est limité à 50 requêtes par jour. Le dataset a 5250 questions : ce quota ne suffit pas. Le sujet demande en plus un runtime local.
+
+On utilise Ollama sur la machine, avec `llama3.2:3b`. Le Mac est un MacBook Air M4, 16 Go. Ce modèle pèse environ 2 Go et laisse de la marge au reste. Un modèle de 7 ou 8 milliards de paramètres répondrait un peu mieux, et ralentirait la machine pendant toute la collecte.
+
+```bash
+brew install ollama
+brew services start ollama
+ollama pull llama3.2:3b
+```
