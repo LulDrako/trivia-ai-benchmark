@@ -52,3 +52,12 @@ brew install ollama
 brew services start ollama
 ollama pull llama3.2:3b
 ```
+
+`src/answer_questions.py` lit `silver/questions.parquet`. Pour chaque question, les réponses possibles sont mélangées et étiquetées A, B, C, D. Le modèle doit répondre par une seule lettre. `ai_correct` compare cette lettre à la lettre qui porte la bonne réponse, pas au texte d'origine. Le résultat est `silver/answers.parquet`, avec le prompt utilisé et `response_time`.
+
+Le script reprend là où il s'est arrêté. Une fois le modèle chargé, une lettre prend une fraction de seconde. Les 5250 questions tiennent dans l'heure.
+
+```bash
+source .venv/bin/activate
+python src/answer_questions.py
+```
