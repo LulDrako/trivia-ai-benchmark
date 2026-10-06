@@ -20,3 +20,13 @@ python src/scrape_opentdb.py
 ```
 
 Si le script s'arrête, relance la même commande : il reprend grâce à `bronze/session.json`. Pour tout recommencer : `python src/scrape_opentdb.py --reset`.
+
+## Silver questions
+
+`src/build_silver_questions.py` lit le bronze et écrit `silver/questions.parquet`. Une ligne = une question. Le CSV bronze n'est pas modifié.
+
+Le script décode les entités HTML (`&quot;` devient `"`, `&#039;` devient `'`), uniformise `type` et `difficulty` en minuscules, et ajoute `question_id`. Cet identifiant est un hash des champs bruts : relancer le script redonne le même id pour la même question. Il n'y a pas encore de réponse de modèle.
+
+```bash
+python src/build_silver_questions.py
+```
