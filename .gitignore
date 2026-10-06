@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+
+# état de reprise du scraping, pas une donnée
+bronze/session.json
+
+# artefacts dbt et base locale
+target/
+dbt_packages/
+logs/
+.user.yml
+warehouse/
