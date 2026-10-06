@@ -10,6 +10,8 @@ OpenTDB renvoie au plus 50 questions par appel, et n'accepte qu'un appel toutes 
 
 Le CSV garde le texte tel que l'API le renvoie (entités HTML comprises). Les mauvaises réponses sont stockées en JSON dans la colonne `incorrect_answers`.
 
+La collecte s'est arrêtée au code 4, avec **5250 questions** écrites. L'API en annonçait **5299** vérifiées. L'écart de 49 vient des coupures réseau : un appel a pu être compté côté OpenTDB sans que la réponse soit écrite dans le CSV. Le jeton a ensuite indiqué qu'il ne restait plus de question nouvelle.
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate

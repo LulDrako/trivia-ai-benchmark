@@ -2,11 +2,12 @@
 __pycache__/
 *.pyc
 .DS_Store
+.cursor/
 
-# état de reprise du scraping, pas une donnée
+# scrape resume state, not a dataset
 bronze/session.json
 
-# artefacts dbt et base locale
+# dbt artifacts and the local warehouse
 target/
 dbt_packages/
 logs/

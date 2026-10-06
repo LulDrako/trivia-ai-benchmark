@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""Récupère l'intégralité d'OpenTDB dans bronze/questions_raw.csv.
+"""Fetch the full OpenTDB question set into bronze/questions_raw.csv.
 
-OpenTDB n'est pas une API paginée : chaque appel renvoie un tirage aléatoire.
-Un token de session mémorise les questions déjà données, jusqu'au code 4
-(plus aucune question nouvelle).
+OpenTDB is not paginated: each call returns a random draw.
+A session token remembers questions already served, until response code 4
+(no new question left).
 
-Contraintes de l'API :
-- 50 questions maximum par appel
-- 1 appel toutes les 5 secondes
-- code 5 : trop d'appels, on attend et on réessaie
-- code 1 : pas assez de questions pour la quantité demandée, on réduit
-- le token est réinitialisé une seule fois, quand toutes les questions sont récupérées
+API constraints:
+- 50 questions maximum per call
+- 1 call every 5 seconds
+- code 5: too many calls, wait and retry
+- code 1: not enough questions for the requested amount, lower it
+- the token is reset once, when every available question has been fetched
 """
 
 from __future__ import annotations
@@ -48,7 +48,7 @@ DEFAULT_SESSION = ROOT / "bronze" / "session.json"
 
 
 class RateLimiter:
-    """Garantit un écart minimum entre deux appels HTTP."""
+    """Enforce a minimum gap between two HTTP calls."""
 
     def __init__(self, interval: float) -> None:
         self.interval = interval
@@ -66,7 +66,7 @@ class RateLimiter:
 
 
 def get_json(session: requests.Session, limiter: RateLimiter, url: str, params: dict | None = None) -> dict:
-    """Appelle OpenTDB en respectant le rate limit. Réessaie sur le code 5 et sur une coupure."""
+    """Call OpenTDB within the rate limit. Retry on code 5 and on a dropped connection."""
     network_errors = 0
     while True:
         limiter.wait()
@@ -113,7 +113,7 @@ def request_token(http: requests.Session, limiter: RateLimiter) -> str:
 
 
 def reset_token(http: requests.Session, limiter: RateLimiter, token: str) -> None:
-    """Remet les questions dans le pool. Une seule fois, quand la collecte est finie."""
+    """Return every question to the pool. Once, when the scrape is finished."""
     payload = get_json(http, limiter, TOKEN_URL, {"command": "reset", "token": token})
     if payload.get("response_code") != 0:
         print(f"Reset du token non confirmé : {payload}")
@@ -252,13 +252,13 @@ def scrape(output: Path, session_path: Path, reset: bool) -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Scrape OpenTDB vers bronze/questions_raw.csv")
+    parser = argparse.ArgumentParser(description="Scrape OpenTDB into bronze/questions_raw.csv")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--session", type=Path, default=DEFAULT_SESSION)
     parser.add_argument(
         "--reset",
         action="store_true",
-        help="Efface le CSV et le token, puis recommence depuis zéro",
+        help="Delete the CSV and the token, then start over",
     )
     return parser.parse_args()
 
