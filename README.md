@@ -1,6 +1,6 @@
 # trivia-ai-benchmark
 
-Benchmark de modèles locaux sur les questions de culture générale d'OpenTDB.
+Benchmark de modèles d'IA sur les questions de culture générale d'OpenTDB.
 
 ## Bronze
 
@@ -30,3 +30,13 @@ Le script décode les entités HTML (`&quot;` devient `"`, `&#039;` devient `'`)
 ```bash
 python src/build_silver_questions.py
 ```
+
+## Pourquoi pas tout en CSV
+
+Le sujet fixe trois formats. On ne choisit pas le Parquet à la place du CSV pour tout le projet.
+
+- Le bronze est un CSV, `questions_raw.csv`. C'est le brut : du texte, une ligne par question. On peut l'ouvrir et vérifier le scrape. On ne le modifie plus.
+- Le silver est en Parquet, parce que le sujet le demande pour les données nettoyées et les réponses des modèles. Le fichier porte déjà les noms de colonnes et leurs types. DuckDB l'ouvre comme une table, sans deviner si une colonne est du texte ou une liste. Ce sera la source de dbt. Pour 5250 lignes, un CSV aurait été lisible aussi. Le gain n'est pas la vitesse. C'est que dbt et DuckDB lisent le schéma tel qu'il est écrit.
+- Le gold sera une base DuckDB, pas un Parquet. Ce ne sont plus les questions, ce sont les chiffres du rapport. dbt les construit.
+
+`profiles.yml`, `dbt_project.yml` et les modèles SQL viennent après l'enrichissement, quand le silver contient aussi `ai_answer`, `ai_correct` et `response_time`. Les écrire maintenant obligerait à les refaire.
