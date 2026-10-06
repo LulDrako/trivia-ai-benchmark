@@ -61,3 +61,31 @@ Le script reprend là où il s'est arrêté. Une fois le modèle chargé, une le
 source .venv/bin/activate
 python src/answer_questions.py
 ```
+
+## Comparaison avec Qwen
+
+`src/answer_questions_qwen.py` applique exactement le même protocole avec
+`qwen2.5:3b`, un modèle gratuit exécuté localement par Ollama. Ses résultats
+sont écrits séparément dans `silver/asnwers_qwen.parquet`, ce qui permet de
+les comparer à `silver/answers.parquet` sans écraser ceux de Llama.
+
+Un seul lancement teste les températures `0`, `0.5` et `1.0`. La colonne
+`temperature` permet ensuite de comparer exactitude et temps de réponse par
+réglage. Vous pouvez choisir votre propre série avec `--temperatures`.
+
+```bash
+ollama pull qwen2.5:3b
+python src/answer_questions_qwen.py
+```
+
+Pour un essai rapide sur dix nouvelles questions :
+
+```bash
+python src/answer_questions_qwen.py --limit 10
+```
+
+Par exemple, pour ne tester que 0 et 0.5 :
+
+```bash
+python src/answer_questions_qwen.py --temperatures 0,0.5
+```
