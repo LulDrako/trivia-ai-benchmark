@@ -110,3 +110,23 @@ Pour Llama, le taux baisse avec la difficulté : 71,9 % en facile, 61,0 % en moy
 La catégorie compte davantage. Chez Llama, les jeux vidéo et les jeux de société restent autour de 46–47 %. L'art atteint 89,7 %, la mythologie 82,9 %, la science et nature 79,8 %. Le modèle connaît mieux certains thèmes que d'autres.
 
 Le temps de réponse ne sépare presque pas les bonnes et les mauvaises réponses chez Llama (environ 0,20 s dans les deux cas). Sur ce benchmark, le temps moyen ne dit pas si le modèle a juste.
+
+## Gold (dbt)
+
+Comme dans le TP Spotify : `staging` (vues), `intermediate` (table), `mart` (tables dans le schéma gold). La base est `warehouse/trivia.duckdb`.
+
+```bash
+mkdir -p warehouse
+dbt run --profiles-dir .
+```
+
+`--profiles-dir .` lit `profiles.yml` à la racine du projet.
+
+## Streamlit
+
+`app.py` lit uniquement les tables gold. Filtres dans la barre latérale : modèle et température.
+
+```bash
+pip install -r requirements.txt
+streamlit run app.py
+```
