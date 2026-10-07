@@ -89,3 +89,24 @@ Par exemple, pour ne tester que 0 et 0.5 :
 ```bash
 python src/answer_questions_qwen.py --temperatures 0,0.5
 ```
+
+## Analyse des réponses
+
+Les chiffres ci-dessous viennent de `silver/answers.parquet` (Llama) et de `silver/answers_qwen.parquet` (Qwen). Même questions, même mélange A/B/C/D, même prompt « Answer with one letter only ».
+
+| Modèle | Température | Taux | Temps moyen |
+|---|---|---|---|
+| `llama3.2:3b` | 0 | **63,8 %** | 0,20 s |
+| `qwen2.5:3b` | 0 | 57,7 % | 0,20 s |
+| `qwen2.5:3b` | 0,5 | 57,9 % | 0,06 s |
+| `qwen2.5:3b` | 1 | 57,4 % | 0,06 s |
+
+Llama gagne d'environ 6 points. Au hasard, un QCM à quatre choix serait autour de 25 %. Les deux modèles font mieux que le hasard. Ni l'un ni l'autre n'est excellent : ce sont des modèles de 3 milliards de paramètres, choisis pour tenir sur un MacBook Air M4 avec 16 Go.
+
+La température change très peu le taux de Qwen (57,4 % à 57,9 %). Sur ce protocole à une lettre, le modèle compte plus que le hasard de génération. Ce n'est pas un échec du test : c'est le résultat.
+
+Pour Llama, le taux baisse avec la difficulté : 71,9 % en facile, 61,0 % en moyen, 56,7 % en difficile. Qwen à température 0 suit le même ordre : 65,5 %, 54,5 %, 52,1 %. Le type (QCM ou vrai/faux) change peu chez Llama (64,0 % contre 62,2 %).
+
+La catégorie compte davantage. Chez Llama, les jeux vidéo et les jeux de société restent autour de 46–47 %. L'art atteint 89,7 %, la mythologie 82,9 %, la science et nature 79,8 %. Le modèle connaît mieux certains thèmes que d'autres.
+
+Le temps de réponse ne sépare presque pas les bonnes et les mauvaises réponses chez Llama (environ 0,20 s dans les deux cas). Sur ce benchmark, le temps moyen ne dit pas si le modèle a juste.

@@ -1,0 +1,17 @@
+name: 'trivia_ai_benchmark'
+version: '1.0.0'
+profile: 'trivia_ai_benchmark'
+
+model-paths: ['src/models']
+
+models:
+  trivia_ai_benchmark:
+    staging:
+      +materialized: view
+
+    intermediate:
+      +materialized: table
+
+    mart:
+      +materialized: table
+      +schema: gold

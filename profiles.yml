@@ -1,0 +1,6 @@
+trivia_ai_benchmark:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: warehouse/trivia.duckdb

@@ -1,0 +1,16 @@
+version: 2
+
+sources:
+  - name: silver
+    tables:
+      - name: questions
+        meta:
+          external_location: "read_parquet('./silver/questions.parquet')"
+
+      - name: answers_llama
+        meta:
+          external_location: "read_parquet('./silver/answers.parquet')"
+
+      - name: answers_qwen
+        meta:
+          external_location: "read_parquet('./silver/answers_qwen.parquet')"
