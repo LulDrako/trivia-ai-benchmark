@@ -66,7 +66,7 @@ python src/answer_questions.py
 
 `src/answer_questions_qwen.py` applique exactement le même protocole avec
 `qwen2.5:3b`, un modèle gratuit exécuté localement par Ollama. Ses résultats
-sont écrits séparément dans `silver/asnwers_qwen.parquet`, ce qui permet de
+sont écrits séparément dans `silver/answers_qwen.parquet`, ce qui permet de
 les comparer à `silver/answers.parquet` sans écraser ceux de Llama.
 
 Un seul lancement teste les températures `0`, `0.5` et `1.0`. La colonne

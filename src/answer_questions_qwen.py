@@ -18,7 +18,7 @@ import requests
 
 ROOT = Path(__file__).resolve().parents[1]
 QUESTIONS_PATH = ROOT / "silver" / "questions.parquet"
-ANSWERS_PATH = ROOT / "silver" / "asnwers_qwen.parquet"
+ANSWERS_PATH = ROOT / "silver" / "answers_qwen.parquet"
 
 # A compact, free-to-run local model. Download it once with:
 #   ollama pull qwen2.5:3b
