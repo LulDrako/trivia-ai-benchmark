@@ -25,7 +25,7 @@ Si le script s'arrête, relance la même commande : il reprend grâce à `bronze
 
 `src/build_silver_questions.py` lit le bronze et écrit `silver/questions.parquet`. Une ligne = une question. Le CSV bronze n'est pas modifié.
 
-Le script décode les entités HTML (`&quot;` devient `"`, `&#039;` devient `'`), uniformise `type` et `difficulty` en minuscules, et ajoute `question_id`. Cet identifiant est un hash des champs bruts : relancer le script redonne le même id pour la même question. Il n'y a pas encore de réponse de modèle.
+Le script décode les entités HTML (`&quot;` devient `"`, `&#039;` devient `'`), uniformise `type` et `difficulty` en minuscules, et ajoute `question_id`. L'id est un hash du contenu nettoyé de la QCM (énoncé + bonne réponse + mauvaises réponses triées), pas de la catégorie : deux lignes OpenTDB avec le même QCM mais une catégorie différente fusionnent. Les variantes avec des distracteurs ou une bonne réponse différents restent distinctes. S'il existe déjà des fichiers de réponses, leurs `question_id` sont remappés.
 
 ```bash
 python src/build_silver_questions.py
@@ -36,7 +36,7 @@ python src/build_silver_questions.py
 Le sujet fixe trois formats. On ne choisit pas le Parquet à la place du CSV pour tout le projet.
 
 - Le bronze est un CSV, `questions_raw.csv`. C'est le brut : du texte, une ligne par question. On peut l'ouvrir et vérifier le scrape. On ne le modifie plus.
-- Le silver est en Parquet, parce que le sujet le demande pour les données nettoyées et les réponses des modèles. Le fichier porte déjà les noms de colonnes et leurs types. DuckDB l'ouvre comme une table, sans deviner si une colonne est du texte ou une liste. Ce sera la source de dbt. Pour 5250 lignes, un CSV aurait été lisible aussi. Le gain n'est pas la vitesse. C'est que dbt et DuckDB lisent le schéma tel qu'il est écrit.
+- Le silver est en Parquet, parce que le sujet le demande pour les données nettoyées et les réponses des modèles. Le fichier porte déjà les noms de colonnes et leurs types. DuckDB l'ouvre comme une table, sans deviner si une colonne est du texte ou une liste. Ce sera la source de dbt. Pour ~5250 lignes (5249 après dédoublonnage silver), un CSV aurait été lisible aussi. Le gain n'est pas la vitesse. C'est que dbt et DuckDB lisent le schéma tel qu'il est écrit.
 - Le gold sera une base DuckDB, pas un Parquet. Ce ne sont plus les questions, ce sont les chiffres du rapport. dbt les construit.
 
 `profiles.yml`, `dbt_project.yml` et les modèles SQL viennent après l'enrichissement, quand le silver contient aussi `ai_answer`, `ai_correct` et `response_time`. Les écrire maintenant obligerait à les refaire.
@@ -124,7 +124,7 @@ dbt run --profiles-dir .
 
 ## Streamlit
 
-`app.py` lit uniquement les tables gold. Filtres dans la barre latérale : modèle et température.
+`app.py` lit uniquement les tables gold. Les chiffres ne sont pas recalculés dans Streamlit : dbt les a déjà agrégés. Filtres dans la barre latérale : modèle et température. Graphiques Plotly pour lire taux, difficulté, catégorie et comparaison des runs.
 
 ```bash
 pip install -r requirements.txt
