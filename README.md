@@ -1,6 +1,6 @@
 # trivia-ai-benchmark
 
-Benchmark de modèles d'IA sur les questions de culture générale d'OpenTDB.
+Benchmark de modèles d'IA sur les questions de culture générale d'OpenTDB
 
 ## Bronze
 
