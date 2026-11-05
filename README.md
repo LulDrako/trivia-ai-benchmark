@@ -130,3 +130,8 @@ dbt run --profiles-dir .
 pip install -r requirements.txt
 streamlit run app.py
 ```
+
+## Auteurs
+
+- [LulDrako](https://github.com/LulDrako)
+- [walidtamairt](https://github.com/walidtamairt)
